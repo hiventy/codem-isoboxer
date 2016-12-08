@@ -175,7 +175,7 @@ ISOBox.prototype._readString = function(length) {
   var str = '';
   for (var c = 0; c < length; c++) {
     var char = this._readUint(8);
-    str += String.fromCharCode(char);
+      str += String.fromCharCode(char);
   }
   return str;
 };
@@ -214,13 +214,14 @@ ISOBox.prototype._parseBox = function() {
 
   this.size = this._readUint(32);
   this.type = this._readString(4);
+  if (this.type === "\u0000\u0000\u0000\u0000") this.type = undefined;
 
   if (this.size == 1)      { this.largesize = this._readUint(64); }
   if (this.type == 'uuid') { this.usertype = this._readString(16); }
 
   switch(this.size) {
   case 0:
-    this._raw = new DataView(this._raw.buffer, this._offset, (this._raw.byteLength - this._cursor.offset));
+    this._raw = new DataView(this._raw.buffer, this._offset, (this._raw.byteLength - this._cursor.offset + 8));
     break;
   case 1:
     if (this._offset + this.size > this._raw.buffer.byteLength) {
@@ -264,6 +265,7 @@ ISOBox.prototype._parseContainerBox = function() {
 ISOBox.prototype._boxContainers = ['dinf', 'edts', 'mdia', 'meco', 'mfra', 'minf', 'moof', 'moov', 'mvex', 'stbl', 'strk', 'traf', 'trak', 'tref', 'udta', 'vttc'];
 
 ISOBox.prototype._boxParsers = {};
+
 // ISO/IEC 14496-15:2014 - avc1 box
 ISOBox.prototype._boxParsers['avc1'] = function() {
   // SampleEntry fields
